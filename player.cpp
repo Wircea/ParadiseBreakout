@@ -6,6 +6,6 @@ class playerChar
         float posx, posy;
         double rotation;
         int fov=90;
-        int visionLength=1024;
+        int visionLength=400;
 
 };
