@@ -38,6 +38,9 @@
 			<Add directory="D:/mingw_dev_lib/lib" />
 		</Linker>
 		<Unit filename="main.cpp" />
+		<Unit filename="player.cpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="textureHandler.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
