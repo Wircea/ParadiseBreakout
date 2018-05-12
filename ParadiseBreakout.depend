@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1526120699 source:d:\proiecte\code blocks workspace\paradisebreakout\main.cpp
+1526143400 source:d:\proiecte\code blocks workspace\paradisebreakout\main.cpp
 	<SDL.h>
 	<SDL_image.h>
 	<stdio.h>
@@ -10,6 +10,7 @@
 	<cmath>
 	"textureHandler.cpp"
 	"player.cpp"
+	"wall.cpp"
 
 1508790582 d:\mingw_dev_lib\include\sdl2\sdl.h
 	"SDL_main.h"
@@ -378,6 +379,8 @@
 	<iostream>
 	"textureHandler.cpp"
 
-1526120383 d:\proiecte\code blocks workspace\paradisebreakout\player.cpp
+1526141994 d:\proiecte\code blocks workspace\paradisebreakout\player.cpp
 	<iostream>
+
+1526135451 d:\proiecte\code blocks workspace\paradisebreakout\wall.cpp
 
