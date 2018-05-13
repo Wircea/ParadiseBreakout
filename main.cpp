@@ -104,30 +104,34 @@ void CloseAll()
 
 wallType wallTest;
 
-int AVAILABLE_WALLS=3;
+int AVAILABLE_WALLS=4;
 
 wallType worldWalls[50];
 
 int main(int argc, char* args[])
 {
-    thePlayer.posx=SCREEN_WIDTH/2;
+    thePlayer.posx=SCREEN_WIDTH/2+100;
     thePlayer.posy=SCREEN_HEIGHT/2;
 
     worldWalls[0].posx1=214;
     worldWalls[0].posy1=50;
     worldWalls[0].posx2=582;
-    worldWalls[0].posy2=53;
+    worldWalls[0].posy2=73;
 
     worldWalls[1].posx1=582;
-    worldWalls[1].posy1=53;
+    worldWalls[1].posy1=73;
     worldWalls[1].posx2=680;
     worldWalls[1].posy2=230;
 
     worldWalls[2].posx1=680;
     worldWalls[2].posy1=230;
-    worldWalls[2].posx2=670;
-    worldWalls[2].posy2=520;
+    worldWalls[2].posx2=770;
+    worldWalls[2].posy2=320;
 
+    worldWalls[3].posx1=230;
+    worldWalls[3].posy1=70;
+    worldWalls[3].posx2=400;
+    worldWalls[3].posy2=72;
     display();
 
     struct pastMousePos
@@ -166,6 +170,18 @@ int main(int argc, char* args[])
                         pastMouse.x=mouseX;
                         //cout<<thePlayer.rotation<<"\n";
                     }
+                    if( e.type == SDL_KEYDOWN )
+					{
+					    switch( e.key.keysym.sym )
+						{
+							case SDLK_UP:
+							    thePlayer.posx -= float(-20*cos((double)(thePlayer.rotation-90)*0.0174532925));
+                                thePlayer.posy -= float(20*sin((double)(thePlayer.rotation-90)*0.0174532925));
+                            case SDLK_DOWN:
+                                thePlayer.posx -= float(-20*cos((double)(thePlayer.rotation-90)*0.0174532925));
+                                thePlayer.posy -= float(-20*sin((double)(thePlayer.rotation-90)*0.0174532925));
+						}
+					}
 				}
 				SDL_SetRenderDrawColor( theRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
 
@@ -226,7 +242,13 @@ int main(int argc, char* args[])
 
                 //cout<<"distanceLeft: "<<worldWalls[i].dist1<<"distanceObject:"<<distanceToObject1<<"\n";
                 if((distanceToObject1<lengthToLeft1||distanceToObject2<lengthToLeft2))
-                    worldWalls[i].renderThis=true;
+                    {
+                        worldWalls[i].renderThis=true;
+                        if(distanceToObject1<lengthToLeft1)
+                            worldWalls[i].edge2OutsideFov=true;
+                        if(distanceToObject2<lengthToLeft2)
+                            worldWalls[i].edge1OutsideFov=true;
+                    }
                     else
                     {
                         double leftToP1 = sqrt(pow(thePlayer.posx+32- worldWalls[i].dist1* sin(fovleft*0.01745329251)-(worldWalls[i].posx1),2)+pow(thePlayer.posy+32+ worldWalls[i].dist1*cos(fovleft*0.0174532925)-worldWalls[i].posy1,2));
@@ -260,7 +282,11 @@ int main(int argc, char* args[])
 
                         if(!faulty)
                         if(worldWalls[i].p1closerToLeft!=worldWalls[i].p2closerToLeft)
-                            worldWalls[i].renderThis=true;
+                            {
+                                worldWalls[i].renderThis=true;
+                                worldWalls[i].edge1OutsideFov=true;
+                                worldWalls[i].edge2OutsideFov=true;
+                            }
                     }
                 //cout<<"dist1:"<<worldWalls[i].dist1<<" dist2:"<<worldWalls[i].dist2<<"/n";
                 //dottest.render( worldWalls[i]posx, worldWalls[i]posy );
@@ -273,36 +299,79 @@ int main(int argc, char* args[])
                     worldWalls[i].p2closerToLeft=false;
 
                     float planeSize=sqrt(pow(thePlayer.posx+32- worldWalls[i].dist1* sin(fovleft*0.01745329251)-(thePlayer.posx+32- worldWalls[i].dist1* sin(fovright*0.01745329251)),2)+pow(thePlayer.posy+32+ worldWalls[i].dist1*cos(fovleft*0.0174532925)-(thePlayer.posy+32+ worldWalls[i].dist1*cos(fovright*0.0174532925)),2));
+                    float planeSize2=sqrt(pow(thePlayer.posx+32- worldWalls[i].dist2* sin(fovleft*0.01745329251)-(thePlayer.posx+32- worldWalls[i].dist2* sin(fovright*0.01745329251)),2)+pow(thePlayer.posy+32+ worldWalls[i].dist2*cos(fovleft*0.0174532925)-(thePlayer.posy+32+ worldWalls[i].dist2*cos(fovright*0.0174532925)),2));
 
-                    //float distFromLeft1 = sqrt(pow(thePlayer.posx+32- worldWalls[i].dist1* sin(fovleft*0.01745329251)-worldWalls[i].posx1,2)+pow(thePlayer.posy+32+ worldWalls[i].dist1*cos(fovleft*0.0174532925)-worldWalls[i].posy1,2));
-                    //float distFromLeft2 = sqrt(pow(thePlayer.posx+32- worldWalls[i].dist2* sin(fovleft*0.01745329251)-worldWalls[i].posx2,2)+pow(thePlayer.posy+32+ worldWalls[i].dist2*cos(fovleft*0.0174532925)-worldWalls[i].posy2,2));
+                    float distFromLeft1 = sqrt(pow(thePlayer.posx+32- worldWalls[i].dist1* sin(fovleft*0.01745329251)-worldWalls[i].posx1,2)+pow(thePlayer.posy+32+ worldWalls[i].dist1*cos(fovleft*0.0174532925)-worldWalls[i].posy1,2));
+                    float distFromLeft2 = sqrt(pow(thePlayer.posx+32- worldWalls[i].dist2* sin(fovleft*0.01745329251)-worldWalls[i].posx2,2)+pow(thePlayer.posy+32+ worldWalls[i].dist2*cos(fovleft*0.0174532925)-worldWalls[i].posy2,2));
 
-                    float distFromLeft1 = thePlayer.posx+32- worldWalls[i].dist1* sin(fovleft*0.01745329251)-worldWalls[i].posx1+thePlayer.posy+32+ worldWalls[i].dist1*cos(fovleft*0.0174532925)-worldWalls[i].posy1;
-                    float distFromLeft2 = thePlayer.posx+32- worldWalls[i].dist2* sin(fovleft*0.01745329251)-worldWalls[i].posx2+thePlayer.posy+32+ worldWalls[i].dist2*cos(fovleft*0.0174532925)-worldWalls[i].posy2;
+                    distFromLeft2=distFromLeft2/planeSize2*planeSize;
 
+                    float fromAtoB= sqrt(pow(worldWalls[i].posx1-worldWalls[i].posx2,2)+pow(worldWalls[i].posy1-worldWalls[i].posy2,2));
 
-                    float heightDifference=worldWalls[i].dist1-worldWalls[i].dist2;
-                    float sizeOfPixel=SCREEN_WIDTH/planeSize;
-
-                    cout<<"pixel size "<<sizeOfPixel<<"\n";
-
-                    float heightOfPixel=SCREEN_HEIGHT/worldWalls[i].dist1;
-
-                    for(float j=distFromLeft2;j<distFromLeft1;j+=sizeOfPixel)
+                    if(worldWalls[i].edge1OutsideFov!=worldWalls[i].edge2OutsideFov)
+                    if(worldWalls[i].edge1OutsideFov)
                     {
-                        SDL_Rect fillRect = { SCREEN_WIDTH/2+j, 200-heightOfPixel*j/distFromLeft2/heightDifference , sizeOfPixel*4,200-heightOfPixel*j/distFromLeft2/heightDifference  };
-                        SDL_SetRenderDrawColor( theRenderer, i*40, 60, 80, 0xFF );
-                        SDL_RenderFillRect( theRenderer, &fillRect );
+                        distFromLeft1=-distFromLeft1;
                     }
 
+                    //float distFromLeft1 = -(thePlayer.posx+32- worldWalls[i].dist1* sin(fovleft*0.01745329251)-worldWalls[i].posx1+thePlayer.posy+32+ worldWalls[i].dist1*cos(fovleft*0.0174532925)-worldWalls[i].posy1);
+                    //float distFromLeft2 = -(thePlayer.posx+32- worldWalls[i].dist2* sin(fovleft*0.01745329251)-worldWalls[i].posx2+thePlayer.posy+32+ worldWalls[i].dist2*cos(fovleft*0.0174532925)-worldWalls[i].posy2);
+
+
+                    float heightDifference=abs(worldWalls[i].dist1/worldWalls[i].dist2);
+                    float sizeOfPixel=SCREEN_WIDTH/planeSize;
+
+
+
+                    float heightOfPixel=SCREEN_HEIGHT/worldWalls[i].dist1;
+                    cout<<"pixel size "<<heightDifference<<"\n";
+
+                    /*for(int k=0;k<planeSize;k++)
+                    {
+                        SDL_Rect fillRect = { k*sizeOfPixel, 0 , sizeOfPixel,600  };
+                        SDL_SetRenderDrawColor( theRenderer, i*40, 60, 80, 200 );
+                        SDL_SetRenderDrawBlendMode(theRenderer, SDL_BLENDMODE_BLEND);
+                        //SDL_RenderFillRect( theRenderer, &fillRect );
+                    }*/
+
+                    /*for(float j=distFromLeft2*sizeOfPixel;j<distFromLeft1*sizeOfPixel;j+=sizeOfPixel)
+                    {
+                        SDL_Rect fillRect = { SCREEN_WIDTH/2-j/sizeOfPixel, 200+heightOfPixel*j/distFromLeft2/sizeOfPixel/2 , sizeOfPixel,200-heightOfPixel*j/distFromLeft2/sizeOfPixel/2  };
+                        SDL_SetRenderDrawColor( theRenderer, i*40, 60, 80, 200 );
+                        SDL_SetRenderDrawBlendMode(theRenderer, SDL_BLENDMODE_BLEND);
+                        SDL_RenderFillRect( theRenderer, &fillRect );
+                    }*/
+
+                    float distDifference=min(worldWalls[i].dist1,worldWalls[i].dist2)-max(worldWalls[i].dist1,worldWalls[i].dist2);
+                    int numberOfPixels=abs(distFromLeft1-distFromLeft2);
+                    float finalPxHeight=fromAtoB/numberOfPixels;
+                    float finalDifference=distDifference/numberOfPixels;
+
+                    if(distDifference<0)
+                        finalPxHeight=-finalPxHeight;
+
+                    cout<<"pixel count:"<<finalPxHeight<<"\n";
+
+                    int incrementor=0;
+                    //50000/max(worldWalls[i].dist1,worldWalls[i].dist2  -- old height
+                    for(float j=distFromLeft2*sizeOfPixel;j>distFromLeft1*sizeOfPixel;j-=sizeOfPixel)
+                    {
+                        SDL_Rect fillRect = { j+finalDifference+sizeOfPixel, SCREEN_HEIGHT/2+(50000/min(worldWalls[i].dist1,worldWalls[i].dist2)+finalPxHeight*incrementor)/2 , ceil(sizeOfPixel), 50000/min(worldWalls[i].dist1,worldWalls[i].dist2)-finalPxHeight*incrementor };
+                        SDL_SetRenderDrawColor( theRenderer, i*40, 20, 80, 255 );
+                        SDL_SetRenderDrawBlendMode(theRenderer, SDL_BLENDMODE_BLEND);
+                        SDL_RenderFillRect( theRenderer, &fillRect );
+                        incrementor++;
+                    }
+                    worldWalls[i].edge1OutsideFov=false;
+                    worldWalls[i].edge2OutsideFov=false;
                     cout<<"size at distance "<<worldWalls[i].dist1<<" is "<<planeSize<<" the wall coord is"<<distFromLeft1<<" and "<<distFromLeft2<<"\n";
                     }
                 }
 
 				SDL_RenderPresent( theRenderer );
 
-				//thePlayer.posx++;
-				//thePlayer.posy++;
+
+
             }
     }
     CloseAll();

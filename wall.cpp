@@ -12,6 +12,8 @@ public:
     float dist2;
 
     bool renderThis;
+    bool edge1OutsideFov;
+    bool edge2OutsideFov;
 
     bool p1closerToLeft;
     bool p2closerToLeft;
