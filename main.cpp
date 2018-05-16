@@ -104,14 +104,14 @@ void CloseAll()
 
 wallType wallTest;
 
-int AVAILABLE_WALLS=4;
+int AVAILABLE_WALLS=5;
 
 wallType worldWalls[50];
 
 int main(int argc, char* args[])
 {
-    thePlayer.posx=SCREEN_WIDTH/2+100;
-    thePlayer.posy=SCREEN_HEIGHT/2;
+    thePlayer.posx=SCREEN_WIDTH/2-200;
+    thePlayer.posy=SCREEN_HEIGHT/2+100;
 
     worldWalls[0].posx1=214;
     worldWalls[0].posy1=50;
@@ -132,6 +132,12 @@ int main(int argc, char* args[])
     worldWalls[3].posy1=70;
     worldWalls[3].posx2=400;
     worldWalls[3].posy2=72;
+
+    worldWalls[4].posx1=770;
+    worldWalls[4].posy1=320;
+    worldWalls[4].posx2=720;
+    worldWalls[4].posy2=350;
+
     display();
 
     struct pastMousePos
@@ -175,11 +181,13 @@ int main(int argc, char* args[])
 					    switch( e.key.keysym.sym )
 						{
 							case SDLK_UP:
-							    thePlayer.posx -= float(-20*cos((double)(thePlayer.rotation-90)*0.0174532925));
-                                thePlayer.posy -= float(20*sin((double)(thePlayer.rotation-90)*0.0174532925));
+							    thePlayer.posx += float(-20*cos((double)(thePlayer.rotation-90)*0.0174532925));
+                                thePlayer.posy += float(-20*sin((double)(thePlayer.rotation-90)*0.0174532925));
+                                break;
                             case SDLK_DOWN:
                                 thePlayer.posx -= float(-20*cos((double)(thePlayer.rotation-90)*0.0174532925));
                                 thePlayer.posy -= float(-20*sin((double)(thePlayer.rotation-90)*0.0174532925));
+                                break;
 						}
 					}
 				}
@@ -288,8 +296,6 @@ int main(int argc, char* args[])
                                 worldWalls[i].edge2OutsideFov=true;
                             }
                     }
-                //cout<<"dist1:"<<worldWalls[i].dist1<<" dist2:"<<worldWalls[i].dist2<<"/n";
-                //dottest.render( worldWalls[i]posx, worldWalls[i]posy );
 
                     if(worldWalls[i].renderThis==true)
                     {
@@ -301,12 +307,14 @@ int main(int argc, char* args[])
                     float planeSize=sqrt(pow(thePlayer.posx+32- worldWalls[i].dist1* sin(fovleft*0.01745329251)-(thePlayer.posx+32- worldWalls[i].dist1* sin(fovright*0.01745329251)),2)+pow(thePlayer.posy+32+ worldWalls[i].dist1*cos(fovleft*0.0174532925)-(thePlayer.posy+32+ worldWalls[i].dist1*cos(fovright*0.0174532925)),2));
                     float planeSize2=sqrt(pow(thePlayer.posx+32- worldWalls[i].dist2* sin(fovleft*0.01745329251)-(thePlayer.posx+32- worldWalls[i].dist2* sin(fovright*0.01745329251)),2)+pow(thePlayer.posy+32+ worldWalls[i].dist2*cos(fovleft*0.0174532925)-(thePlayer.posy+32+ worldWalls[i].dist2*cos(fovright*0.0174532925)),2));
 
+                    float planeHeight = planeSize*SCREEN_HEIGHT/SCREEN_WIDTH;
+                    float planeHeight2 = planeSize2*SCREEN_HEIGHT/SCREEN_WIDTH;
+
                     float distFromLeft1 = sqrt(pow(thePlayer.posx+32- worldWalls[i].dist1* sin(fovleft*0.01745329251)-worldWalls[i].posx1,2)+pow(thePlayer.posy+32+ worldWalls[i].dist1*cos(fovleft*0.0174532925)-worldWalls[i].posy1,2));
                     float distFromLeft2 = sqrt(pow(thePlayer.posx+32- worldWalls[i].dist2* sin(fovleft*0.01745329251)-worldWalls[i].posx2,2)+pow(thePlayer.posy+32+ worldWalls[i].dist2*cos(fovleft*0.0174532925)-worldWalls[i].posy2,2));
 
                     distFromLeft2=distFromLeft2/planeSize2*planeSize;
 
-                    float fromAtoB= sqrt(pow(worldWalls[i].posx1-worldWalls[i].posx2,2)+pow(worldWalls[i].posy1-worldWalls[i].posy2,2));
 
                     if(worldWalls[i].edge1OutsideFov!=worldWalls[i].edge2OutsideFov)
                     if(worldWalls[i].edge1OutsideFov)
@@ -314,64 +322,64 @@ int main(int argc, char* args[])
                         distFromLeft1=-distFromLeft1;
                     }
 
-                    //float distFromLeft1 = -(thePlayer.posx+32- worldWalls[i].dist1* sin(fovleft*0.01745329251)-worldWalls[i].posx1+thePlayer.posy+32+ worldWalls[i].dist1*cos(fovleft*0.0174532925)-worldWalls[i].posy1);
-                    //float distFromLeft2 = -(thePlayer.posx+32- worldWalls[i].dist2* sin(fovleft*0.01745329251)-worldWalls[i].posx2+thePlayer.posy+32+ worldWalls[i].dist2*cos(fovleft*0.0174532925)-worldWalls[i].posy2);
-
-
                     float heightDifference=abs(worldWalls[i].dist1/worldWalls[i].dist2);
                     float sizeOfPixel=SCREEN_WIDTH/planeSize;
 
-
-
                     float heightOfPixel=SCREEN_HEIGHT/worldWalls[i].dist1;
-                    cout<<"pixel size "<<heightDifference<<"\n";
 
-                    /*for(int k=0;k<planeSize;k++)
-                    {
-                        SDL_Rect fillRect = { k*sizeOfPixel, 0 , sizeOfPixel,600  };
-                        SDL_SetRenderDrawColor( theRenderer, i*40, 60, 80, 200 );
-                        SDL_SetRenderDrawBlendMode(theRenderer, SDL_BLENDMODE_BLEND);
-                        //SDL_RenderFillRect( theRenderer, &fillRect );
-                    }*/
+                    float theBaseHeight1=worldWalls[i].dist1;
+                    float theBaseHeight2=worldWalls[i].dist2;
 
-                    /*for(float j=distFromLeft2*sizeOfPixel;j<distFromLeft1*sizeOfPixel;j+=sizeOfPixel)
-                    {
-                        SDL_Rect fillRect = { SCREEN_WIDTH/2-j/sizeOfPixel, 200+heightOfPixel*j/distFromLeft2/sizeOfPixel/2 , sizeOfPixel,200-heightOfPixel*j/distFromLeft2/sizeOfPixel/2  };
-                        SDL_SetRenderDrawColor( theRenderer, i*40, 60, 80, 200 );
-                        SDL_SetRenderDrawBlendMode(theRenderer, SDL_BLENDMODE_BLEND);
-                        SDL_RenderFillRect( theRenderer, &fillRect );
-                    }*/
+                    int numberOfPixels=abs(distFromLeft1*sizeOfPixel/sizeOfPixel-distFromLeft2*sizeOfPixel);
 
-                    float distDifference=min(worldWalls[i].dist1,worldWalls[i].dist2)-max(worldWalls[i].dist1,worldWalls[i].dist2);
-                    int numberOfPixels=abs(distFromLeft1-distFromLeft2);
-                    float finalPxHeight=fromAtoB/numberOfPixels;
-                    float finalDifference=distDifference/numberOfPixels;
+                    float theVerticalPixelDifference;
 
-                    if(distDifference<0)
-                        finalPxHeight=-finalPxHeight;
-
-                    cout<<"pixel count:"<<finalPxHeight<<"\n";
+                    float baseHeight=planeHeight/min(worldWalls[i].dist1,worldWalls[i].dist2);
 
                     int incrementor=0;
-                    //50000/max(worldWalls[i].dist1,worldWalls[i].dist2  -- old height
+
                     for(float j=distFromLeft2*sizeOfPixel;j>distFromLeft1*sizeOfPixel;j-=sizeOfPixel)
                     {
-                        SDL_Rect fillRect = { j+finalDifference+sizeOfPixel, SCREEN_HEIGHT/2+(50000/min(worldWalls[i].dist1,worldWalls[i].dist2)+finalPxHeight*incrementor)/2 , ceil(sizeOfPixel), 50000/min(worldWalls[i].dist1,worldWalls[i].dist2)-finalPxHeight*incrementor };
+                        incrementor++;
+
+                    }
+                    numberOfPixels=incrementor;
+
+                    cout<<incrementor<<"\n";
+                    float newDist2=worldWalls[i].dist2/planeSize*planeSize2;
+
+
+                    float scaledSize1=SCREEN_HEIGHT/worldWalls[i].dist1*SCREEN_HEIGHT/4;
+                    float scaledSize2=SCREEN_HEIGHT/worldWalls[i].dist2*SCREEN_HEIGHT/4;
+                    float scaledDifference=scaledSize1-scaledSize2;
+                    theVerticalPixelDifference=scaledDifference/numberOfPixels;
+
+
+                    incrementor=0;
+                    for(float j=distFromLeft2*sizeOfPixel;j>distFromLeft1*sizeOfPixel;j-=sizeOfPixel)
+                    {
+                        float heightFinal;
+
+
+
+                        if(scaledSize1>scaledSize2)
+                            heightFinal=min(scaledSize1,scaledSize2)+abs(theVerticalPixelDifference)*incrementor;
+                        else
+                            heightFinal=max(scaledSize1,scaledSize2)-abs(theVerticalPixelDifference)*incrementor;
+
+                        SDL_Rect fillRect = { j,SCREEN_HEIGHT/2- ( heightFinal)/2 , ceil(sizeOfPixel), heightFinal};
                         SDL_SetRenderDrawColor( theRenderer, i*40, 20, 80, 255 );
                         SDL_SetRenderDrawBlendMode(theRenderer, SDL_BLENDMODE_BLEND);
                         SDL_RenderFillRect( theRenderer, &fillRect );
+
                         incrementor++;
                     }
                     worldWalls[i].edge1OutsideFov=false;
                     worldWalls[i].edge2OutsideFov=false;
-                    cout<<"size at distance "<<worldWalls[i].dist1<<" is "<<planeSize<<" the wall coord is"<<distFromLeft1<<" and "<<distFromLeft2<<"\n";
+
                     }
                 }
-
 				SDL_RenderPresent( theRenderer );
-
-
-
             }
     }
     CloseAll();
