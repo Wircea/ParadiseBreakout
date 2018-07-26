@@ -14,9 +14,11 @@ public:
     bool renderThis;
     bool edge1OutsideFov;
     bool edge2OutsideFov;
+    bool bothSeen;
 
     bool p1closerToLeft;
     bool p2closerToLeft;
+
 
     textureType* wallTex;
 };
