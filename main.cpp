@@ -17,7 +17,7 @@ int SCREEN_WIDTH=800;
 int SCREEN_HEIGHT=600;
 
 const int playerHalf=32;
-const int cameraOffset=16;
+const int cameraOffset=8;
 
 SDL_Window* theWindow;
 SDL_Surface* theSurface;
@@ -107,34 +107,43 @@ void CloseAll()
 
 wallType wallTest;
 
-int AVAILABLE_WALLS=1;
+int AVAILABLE_WALLS=4;
 
 wallType worldWalls[50];
+
+
+int GetDistanceToWall(wallType w1)
+{
+    float fractionTop= abs((w1.posy2-w1.posy1)*thePlayer.posx-(w1.posx2-w1.posx1)*thePlayer.posy+(w1.posx2*w1.posy1)-(w1.posx1*w1.posy2));
+    float fractionBelow= sqrt(pow(w1.posy2-w1.posy1,2)+pow(w1.posx2-w1.posx1,2));
+
+    return (int)(fractionTop/fractionBelow);
+}
 
 int main(int argc, char* args[])
 {
     thePlayer.posx=200;
     thePlayer.posy=200;
 
-    worldWalls[0].posx1=214;
-    worldWalls[0].posy1=50;
-    worldWalls[0].posx2=582;
-    worldWalls[0].posy2=73;
+    worldWalls[0].posx1=100;
+    worldWalls[0].posy1=100;
+    worldWalls[0].posx2=500;
+    worldWalls[0].posy2=100;
 
-    worldWalls[1].posx1=582;
-    worldWalls[1].posy1=73;
-    worldWalls[1].posx2=680;
-    worldWalls[1].posy2=230;
+    worldWalls[1].posx1=500;
+    worldWalls[1].posy1=100;
+    worldWalls[1].posx2=500;
+    worldWalls[1].posy2=500;
 
-    worldWalls[2].posx1=680;
-    worldWalls[2].posy1=230;
-    worldWalls[2].posx2=770;
-    worldWalls[2].posy2=320;
+    worldWalls[2].posx1=500;
+    worldWalls[2].posy1=500;
+    worldWalls[2].posx2=100;
+    worldWalls[2].posy2=500;
 
-    worldWalls[3].posx1=230;
-    worldWalls[3].posy1=70;
-    worldWalls[3].posx2=400;
-    worldWalls[3].posy2=72;
+    worldWalls[3].posx1=100;
+    worldWalls[3].posy1=500;
+    worldWalls[3].posx2=100;
+    worldWalls[3].posy2=100;
 
     worldWalls[4].posx1=770;
     worldWalls[4].posy1=320;
@@ -234,6 +243,7 @@ int main(int argc, char* args[])
                     //SDL_RenderDrawLine( theRenderer,walltestposx,walltestposy,walltestposz,walltestposh);}
                      //cout<<walltestposx<<" compared to "<<cameraX- thePlayer.visionLength* sin(fovleft*0.01745329251)<<"\n";
 
+                cout<<GetDistanceToWall(worldWalls[0])<<"\n";
 
                 for(int i=0;i<AVAILABLE_WALLS;i++)
                 {
@@ -260,11 +270,11 @@ int main(int argc, char* args[])
                 double distanceToObject1=sqrt(pow( cameraX- worldWalls[i].dist1* sin(thePlayer.rotation* 0.01745329251)-worldWalls[i].posx1,2)+pow(cameraY+ worldWalls[i].dist1*cos(thePlayer.rotation* 0.0174532925)-worldWalls[i].posy1,2));
                 double distanceToObject2=sqrt(pow( cameraX- worldWalls[i].dist2* sin(thePlayer.rotation* 0.01745329251)-worldWalls[i].posx2,2)+pow(cameraY+ worldWalls[i].dist2*cos(thePlayer.rotation* 0.0174532925)-worldWalls[i].posy2,2));
 
-                float planeSize=sqrt(pow(cameraX- max(worldWalls[i].dist1,worldWalls[i].dist2)* sin(fovleft*0.01745329251)-(cameraX- max(worldWalls[i].dist1,worldWalls[i].dist2)* sin(fovright*0.01745329251)),2)+pow(cameraY+  max(worldWalls[i].dist1,worldWalls[i].dist2)*cos(fovleft*0.0174532925)-(cameraY+  max(worldWalls[i].dist1,worldWalls[i].dist2)*cos(fovright*0.0174532925)),2));
+                float planeSize=sqrt(pow(cameraX- worldWalls[i].dist1* sin(fovleft*0.01745329251)-(cameraX- worldWalls[i].dist1* sin(fovright*0.01745329251)),2)+pow(cameraY+  worldWalls[i].dist1*cos(fovleft*0.0174532925)-(cameraY+ worldWalls[i].dist1*cos(fovright*0.0174532925)),2));
                 //cout<<"distanceLeft: "<<worldWalls[i].dist1<<"distanceObject:"<<distanceToObject1<<"\n";
 
                 if(lengthToLeft1+distanceToObject1>planeSize)
-                    cout<<"output";
+                    //cout<<"output";
                 if((distanceToObject1<lengthToLeft1||distanceToObject2<lengthToLeft2))
                     {
                         worldWalls[i].renderThis=true;
@@ -358,7 +368,7 @@ int main(int argc, char* args[])
                     else
                     if(worldWalls[i].edge1OutsideFov&&worldWalls[i].edge2OutsideFov)
                     {
-                        cout<<"kebab";
+                        //cout<<"kebab";
                         distFromLeft1=-abs(distFromLeft1);
                     }
 
@@ -451,6 +461,21 @@ int main(int argc, char* args[])
                             flipPixelSizeSign2=true;
                     }
 
+                    float raportEdges=max(worldWalls[i].dist1/worldWalls[i].dist2,worldWalls[i].dist2/worldWalls[i].dist1);
+
+                    cout<<raportEdges<<"         \n";
+
+                    if(worldWalls[i].edge1OutsideFov)
+                        worldWalls[i].dist1=worldWalls[i].dist1+distFromLeft1;
+                    if(worldWalls[i].edge2OutsideFov)
+                        worldWalls[i].dist2=worldWalls[i].dist2-(distFromLeft2-planeSize);
+
+                    if(worldWalls[i].dist1<32)
+                        worldWalls[i].dist1=32;
+                    if(worldWalls[i].dist2<32)
+                        worldWalls[i].dist2=32;
+
+
                     float distFromMiddleToWall1=sqrt(pow(cameraX+worldWalls[i].dist1*sin(thePlayer.rotation* 0.01745329251)-worldWalls[i].posx1,2)+pow(cameraY+worldWalls[i].dist1*cos(thePlayer.rotation* 0.01745329251)-worldWalls[i].posy1,2))/planeSize*100;
                     float distFromMiddleToWall2=sqrt(pow(cameraX+worldWalls[i].dist2*sin(thePlayer.rotation* 0.01745329251)-worldWalls[i].posx2,2)+pow(cameraY+worldWalls[i].dist2*cos(thePlayer.rotation* 0.01745329251)-worldWalls[i].posy2,2))/planeSize2*100;
 
@@ -511,6 +536,8 @@ int main(int argc, char* args[])
                         secondHalfFovSize=degreePerPixel/(max(min(distFromLeft1,distFromLeft2),(float)1)*sizeOfPixel);
                     //cout<<degreePerPixel<<" "<<firstHalfFovSize<<" "<<secondHalfFovSize<<"\n";
 
+
+
                     incrementor=0;
                     bool changedOnce=false;
                     for(float j=distFromLeft2*sizeOfPixel;j>(distFromLeft1-1)*sizeOfPixel;j-=sizeOfPixel)
@@ -539,7 +566,7 @@ int main(int argc, char* args[])
                     }
 
 
-                    cout<<worldWalls[i].edge1OutsideFov<<" "<<worldWalls[i].edge2OutsideFov<<"\n";
+                    //cout<<worldWalls[i].edge1OutsideFov<<" "<<worldWalls[i].edge2OutsideFov<<"\n";
                     //cout<<"size of minPoint: "<<scaledSizeMid<<" out of "<<scaledSize1<<" and "<<scaledSize2<<"\n";
                     worldWalls[i].edge1OutsideFov=false;
                     worldWalls[i].edge2OutsideFov=false;
